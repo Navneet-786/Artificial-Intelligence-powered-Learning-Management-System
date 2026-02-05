@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Outfit } from "next/font/google";
 
@@ -11,8 +12,11 @@ const outfit = Outfit({
 });
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={outfit.className}>{children}</body>
-    </html>
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+      {" "}
+      <html lang="en">
+        <body className={outfit.className}>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
