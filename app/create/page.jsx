@@ -4,15 +4,28 @@ import { Mulish } from "next/font/google";
 import SelectOptions from "./_components/SelectOptions";
 import { Button } from "@/components/ui/button";
 import TopicInput from "./_components/TopicInput";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 const pacifico = Mulish({
   subsets: ["latin"],
   weight: "400", // Pacifico me sirf 400 hota hai
 });
 
 const Create = () => {
+  const { user } = useUser();
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState([]);
+  //create router
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({});
+  const isFormValid =
+    formData.courseType && formData.topic && formData.difficultyLevel;
   //handle user
   const handleUserInput = (fieldName, fieldValue) => {
     setFormData((prev) => {
@@ -22,6 +35,23 @@ const Create = () => {
       };
     });
   };
+
+  //generate course outline
+  const GenerateCourseOutline = async () => {
+    const courseId = uuidv4();
+    setLoading(true);
+    const result = await axios.post("/api/generate-course-outline", {
+      courseId: courseId,
+      ...formData,
+      createdBy: user?.primaryEmailAddress?.emailAddress,
+    });
+
+    setLoading(false);
+    router.replace("/dashboard");
+
+    console.log("create result: ", result?.data?.result?.res);
+  };
+
   useEffect(() => {
     console.log("Updated formData:", formData);
   }, [formData]);
@@ -43,7 +73,7 @@ const Create = () => {
         {step == 0 ? (
           <SelectOptions
             selectStudyType={(value) => {
-              handleUserInput("studyType", value);
+              handleUserInput("courseType", value);
             }}
           />
         ) : (
@@ -67,7 +97,12 @@ const Create = () => {
         {step == 0 ? (
           <Button onClick={() => setStep(step + 1)}>Next</Button>
         ) : (
-          <Button>Generate</Button>
+          <Button
+            disabled={!isFormValid}
+            onClick={() => GenerateCourseOutline()}
+          >
+            {loading ? <Loader className="animate-spin" /> : "Generate"}
+          </Button>
         )}
       </div>
     </div>
