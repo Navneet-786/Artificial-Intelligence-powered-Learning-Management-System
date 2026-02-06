@@ -10,7 +10,7 @@ import { createRouteMatcher } from "@clerk/nextjs/server";
  * /forum            → protected
  * /forum/...        → protected
  */
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/forum(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/create"]);
 
 /**
  * Clerk middleware runs on every request matched by `config.matcher`
